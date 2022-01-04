@@ -3,3 +3,4 @@ flask-restful
 psycopg2-binary
 passlib
 email-validator
+flask-jwt-extended

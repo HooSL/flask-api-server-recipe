@@ -12,6 +12,9 @@ from resources.register import UserRegisterResource
 
 app = Flask(__name__)
 
+#JWP 토큰 만들기
+jwp = JWPManager()
+
 api = Api(app)
 
 # 경로와 리소스를 연결한다.
