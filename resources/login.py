@@ -10,10 +10,12 @@ from email_validator import validate_email, EmailNotValidError
 
 from utils import hash_password, check_password
 
+from flask_jwt_extended import create_access_token
+
 class UserLoginResource(Resource) :
     def post(self) :
 
-        # 1. 클라이언트로부터, 이메일, 비밀번호등의 정보를 받아온다.
+        # 1. 클라이언트로부터, 이메일, 비번등의 정보를 받아온다.
         data = request.get_json()
         # data={"email" : "fff@naver.com", "password" : "1234"}
 
@@ -58,16 +60,23 @@ class UserLoginResource(Resource) :
             else :
                 print('connection does not exist')
 
-        # 2-1. 만약 없는 이메일 주소로 DB에 요청했을땐 데이터가 없으므로, 클라이언트에게 회원가입 되어있지 않다고, 응답한다.
+        # 2-1. 만약 없는 이메일 주소로 DB에 요청했을땐
+        #      데이터가 없으므로, 클라이언트에게 
+        #      회원가입 되어있지 않다고, 응답한다.
         if len( record_list ) == 0 :
             return {'error' : '회원가입 되어있지 않은 사람입니다.'}, HTTPStatus.UNAUTHORIZED
     
-        # 3. 클라이언트로부터 받은 비밀번호와, DB에 저장된 비밀번호가 동일한지 체크한다.        
+        # 3. 클라이언트로부터 받은 비번과, DB에 저장된 비번이
+        #    동일한지 체크한다.        
         # data['password']
         # record_list[0]['password']        
         if check_password(data['password'], record_list[0]['password']) == False :
+            # 4. 다르면, 비번 틀렸다고 클라이언트에 응답한다.
+            return {'error' : '비번이 다릅니다.'}, HTTPStatus.BAD_REQUEST
 
-        # 4. 다르면, 비번 틀렸다고 클라이언트에 응답한다.
-            return {'error' : '비밀번호이 다릅니다.'}, HTTPStatus.BAD_REQUEST
+        # 5. JTW 인증 토큰을 만들어준다.
+        #    유저 아이디를 가지고 인증토큰을 만든다.
+        user_id = record_list[0]['id']
+        access_token = create_access_token(user_id)
 
-        return {'result' : '로그인이 되었습니다.'}
+        return {'result' : '로그인이 되었습니다.', 'access_token' : access_token}
