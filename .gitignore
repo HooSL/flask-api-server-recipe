@@ -1,6 +1,5 @@
-
-
-
+#커넥션 주소 올리면 안됨
+mysql_connection.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
